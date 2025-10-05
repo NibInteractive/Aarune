@@ -79,10 +79,15 @@ function Physics:ResolveCollision(A, B)
     end
 end
 
-function Physics:Update(Object, dt)
+function Physics:Update(Object, dt, StaticObjects)
+    if Object.PhysicsType == "Dynamic" then
+        Object.OnGround = false
+    end
+
+    -- Apply gravity
     if Object.vy then
         self:ApplyGravity(Object, dt)
-    end    
+    end
 end
 
 return Physics

@@ -40,7 +40,7 @@ function love.load()
 
         Draw = function(self)
             love.graphics.setColor(1, 1, 0)
-            love.graphics.circle("fill", self.x, self.y, self.width)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
             love.graphics.setColor(1, 1, 1)
         end,
     }
@@ -59,7 +59,7 @@ function love.load()
     }
 
     local Box = {
-        x = 300,
+        x = 350,
         y = 300,
         width = 50,
         height = 50,
@@ -72,9 +72,9 @@ function love.load()
     }
 
     local Box2 = {
-        x = 750,
+        x = 700,
         y = 450,
-        width = 75,
+        width = 95,
         height = 50,
 
         Draw = function(self)
@@ -84,11 +84,50 @@ function love.load()
         end,
     }
 
-    GamePhysics:StaticBodies({ Platform, Box, Box2 })
+    local Box3 = {
+        x = 575,
+        y = 400,
+        width = 75,
+        height = 50,
+
+        Draw = function(self)
+            love.graphics.setColor(1, 0, 1)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(1, 0, 1)
+        end,
+    }
+
+    local Box4 = {
+        x = 450,
+        y = 350,
+        width = 75,
+        height = 50,
+
+        Draw = function(self)
+            love.graphics.setColor(1, 0.5, .75)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(1, 0.5, .75)
+        end,
+    }
+
+    local Circle = {
+        x = 500,
+        y = 500,
+        width = 25,
+        height = 25,
+
+        Draw = function(self)
+            love.graphics.setColor(1, .5, 0)
+            love.graphics.circle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(1, 1, 1)
+        end,
+    }
+
+    GamePhysics:StaticBodies({ Platform, Box, Box2, Box3, Box4, Circle })
     GamePhysics:ApplyFriction(Player, 0.8)
     
     Engine:SetWindow("Aarune Engine Example", 800, 600, true, true)
-    Engine:INIT("Main", {Player, Platform, Box, Box2})
+    Engine:INIT("Main", {Player, Platform, Box, Box2, Box3, Box4, Circle})
 end
 
 function love.update(dt)
