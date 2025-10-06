@@ -6,12 +6,14 @@ local Settings = require("ProjectSettings")
 
 local Engine = {}
 Engine.Scenes = {}
-Engine.CurrentScene = nil
+Engine.CurrentScene = Scene.CurrentScene
 
 Engine.Cameras = {}
 Engine.CurrentCamera = nil
 
 Engine.Objects = {}
+
+Scene:SetEngine(Engine)
 
 local function CreateSessionID()
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
@@ -65,14 +67,59 @@ end
 
 function Engine:CreateScene(SceneName)
     local NewScene = Scene:New(SceneName or ("Scene" .. tostring(#self.Scenes + 1)))
+    self.Scenes[SceneName] = NewScene
 
     return NewScene
 end
 
+function Engine:ChangeScene(SceneName)
+    if not SceneName or type(SceneName) ~= "string" then return end
+    local SceneToChange = self.Scenes[SceneName]
+    if not SceneToChange then return end
+
+    self.CurrentScene = SceneToChange
+    self.CurrentCamera = SceneToChange.Camera or Camera:New()
+    self.CurrentScene:SetCamera(self.CurrentCamera)
+end
+
+function Engine:LoadScene(Name)
+    if not self.Scenes[Name] then
+        self:CreateScene(Name)
+    end
+
+    self:ChangeScene(Name)
+end
+
 function Engine:AddObject(Object)
-    if not self.CurrentScene or Object then return end
+    if not self.CurrentScene or not Object then return end
 
     self.CurrentScene:Add(Object)
+end
+
+function Engine:AddObjects(Objects)
+    if not self.CurrentScene or not Objects or type(Objects) ~= "table" then return end
+
+    self.CurrentScene:AddObjects(Objects)    
+end
+
+function Engine:RemoveObject(Object)
+    if not self.CurrentScene or not Object then return end
+
+    self.CurrentScene:Remove(Object)    
+end
+
+function Engine:RemoveObjects(Objects)
+    if not self.CurrentScene or not Objects or type(Objects) ~= "table" then return end
+
+    for _, Object in ipairs(Objects) do
+        self.CurrentScene:Remove(Object)
+    end    
+end
+
+function Engine:ClearScene()
+    if not self.CurrentScene then return end
+
+    self.CurrentScene:Clear()        
 end
 
 function Engine:CreateCamera()
@@ -106,6 +153,7 @@ function Engine:Draw()
             love.graphics.print(
                 "Camera Position: " .. math.floor(self.CurrentCamera.x) .. ", " .. math.floor(self.CurrentCamera.y), 10, 10
             )
+            love.graphics.print("Current Scene: " .. self.CurrentScene.Name, 1920, 0)
         end
 
         self.CurrentScene:Draw()

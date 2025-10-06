@@ -1,11 +1,19 @@
 local Scene = {}
 Scene.__index = Scene
+Scene.CurrentScene = nil
+
+local Engine
+
+function Scene:SetEngine(EnginePath)
+    Engine = EnginePath
+end
 
 function Scene:New(Name)
     local MetaScene = setmetatable({}, Scene)
     MetaScene.Name = Name or "Unnamed"
     MetaScene.Objects = {}
     MetaScene.Camera = nil
+
     return MetaScene
 end
 
@@ -55,11 +63,20 @@ function Scene:Clear()
     self.Objects = {}    
 end
 
-function Scene:ChangeScene(_Scene)
-    if not _Scene or getmetatable(_Scene) ~= _Scene then return end
+function Scene:ChangeScene(Name)
+    if not Engine then return end
+    Engine:ChangeScene(Name)
+end
 
-    self.Objects = _Scene.Objects
-    self.Camera = _Scene.Camera
+function Scene:Remove(Object)
+    if not Object then return end
+
+    for i, Obj in ipairs(self.Objects) do
+        if Obj == Object then
+            table.remove(self.Objects, i)
+            break
+        end
+    end
 end
 
 function Scene:RemoveScene(_Scene)

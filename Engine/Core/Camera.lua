@@ -16,7 +16,7 @@ function Camera:New()
     MetaCamera.DeadZoneWidth = 35
     MetaCamera.DeadZoneHeight = 20
 
-    MetaCamera.CameraType = "Static" -- Future use
+    MetaCamera.CameraType = "Follow" -- Future use
 
     return MetaCamera
 end

@@ -2,9 +2,18 @@ local Engine = require("Engine.Core.Core")
 local Bindings = require("Engine.Input.Bindings")
 local Physics = require("Engine.Physics.Physics")
 
+local SpriteRenderer = require("Engine.Rendering.SpriteRenderer")
+
 local GamePhysics = Physics:New()
 
 local PlayerBindings = Bindings:New()
+
+
+local Renderer = SpriteRenderer:New("GameRenderer")
+Renderer:NewSprite("Chopper", "Assets/Chopper.jpg", 5)
+Renderer:NewSprite("Nami", "Assets/Nami.jfif", 3)
+
+Renderer:SetScale("Chopper", 0.405, 0.405)
 
 function love.load()
     PlayerBindings:BindKeys({
@@ -123,11 +132,27 @@ function love.load()
         end,
     }
 
+    local Circle2 = {
+        x = 500,
+        y = 500,
+        width = 25,
+        height = 25,
+
+        Draw = function(self)
+            love.graphics.setColor(1, .5, 0)
+            love.graphics.circle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(1, 1, 1)
+        end,
+    }
+
     GamePhysics:StaticBodies({ Platform, Box, Box2, Box3, Box4, Circle })
     GamePhysics:ApplyFriction(Player, 0.8)
     
     Engine:SetWindow("Aarune Engine Example", 800, 600, true, true)
     Engine:INIT("Main", {Player, Platform, Box, Box2, Box3, Box4, Circle})
+
+    Engine:CreateScene("Secondary")
+    Engine:ChangeScene("Secondary")
 end
 
 function love.update(dt)
@@ -142,4 +167,6 @@ function love.draw()
     love.graphics.print("Objects in Scene: " .. #Engine.CurrentScene.Objects, 10, 50)
     love.graphics.print(BindingsList, 10, 70)
     love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 90 + (Count * 9))
+
+    Renderer:DrawAll()
 end
