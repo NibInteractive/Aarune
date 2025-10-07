@@ -1,6 +1,8 @@
 local Physics = {}
 Physics.__index = Physics
 
+-- If you like pure OOP based frameworks/engines, you can always redirect the requires --
+-- PhysicsAPI wrapper, should be automated ECS or OOP, as of V0.6.2-Prototype --
 function Physics:New()
     local MetaPhysics = setmetatable({}, Physics)
 
@@ -18,11 +20,26 @@ function Physics:ApplyGravity(Object, dt)
     Object.y = Object.y + Object.vy * dt
 end
 
+function Physics:DynamicBody(Object)
+    if not Object then return end
+
+    Object.PhysicsType = "Dynamic"
+    Object.vy = 0
+end
+
+function Physics:DynamicBodies(Objects)
+    if not Objects or type(Objects) ~= "table" then return end
+
+    for _, Object in ipairs(Objects) do
+        self:DynamicBody(Object)
+    end
+end
+
 function Physics:StaticBody(Object)
     if not Object then return end
 
     Object.PhysicsType = "Static"
-    Object.vy = nil    
+    Object.vy = nil
 end
 
 function Physics:StaticBodies(Objects)
@@ -79,7 +96,7 @@ function Physics:ResolveCollision(A, B)
     end
 end
 
-function Physics:Update(Object, dt, StaticObjects)
+function Physics:Update(Object, dt)
     if Object.PhysicsType == "Dynamic" then
         Object.OnGround = false
     end

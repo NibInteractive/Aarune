@@ -2,20 +2,19 @@ local Engine = require("Engine.Core.Core")
 local Bindings = require("Engine.Input.Bindings")
 local Physics = require("Engine.Physics.Physics")
 
-local SpriteRenderer = require("Engine.Rendering.SpriteRenderer")
+local Graphics = require("Engine.Rendering.Graphics")
 
 local GamePhysics = Physics:New()
-
 local PlayerBindings = Bindings:New()
 
-
-local Renderer = SpriteRenderer:New("GameRenderer")
-Renderer:NewSprite("Chopper", "Assets/Chopper.jpg", 5)
-Renderer:NewSprite("Nami", "Assets/Nami.jfif", 3)
-
-Renderer:SetScale("Chopper", 0.405, 0.405)
-
 function love.load()
+    GFX = Graphics:New()
+
+    PlayerImage = love.graphics.newImage("Assets/Robin.jpg")
+
+    Chopper = GFX:AddSpriteEntity("Assets/Chopper.jpg", 3, 1600, 50, 0.45, 0.45)
+    Nami = GFX:AddSpriteEntity("Assets/Nami.jfif", 4, 300, 500, 1.25, 1.25)
+
     PlayerBindings:BindKeys({
         MoveRight = "d",
         MoveLeft = "a",
@@ -25,8 +24,8 @@ function love.load()
     local Player = {
         x = 100,
         y = 100,
-        width = 32,
-        height = 32,
+        width = 45,
+        height = 45,
         speed = 200,
 
         -- Physics properties --
@@ -48,9 +47,11 @@ function love.load()
         end,
 
         Draw = function(self)
-            love.graphics.setColor(1, 1, 0)
+            love.graphics.draw(PlayerImage, self.x, self.y, 0, self.width / PlayerImage:getWidth(), self.height / PlayerImage:getHeight())
+
+            --[[love.graphics.setColor(1, 1, 0)
             love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(1, 1, 1)]]
         end,
     }
 
@@ -151,12 +152,13 @@ function love.load()
     Engine:SetWindow("Aarune Engine Example", 800, 600, true, true)
     Engine:INIT("Main", {Player, Platform, Box, Box2, Box3, Box4, Circle})
 
-    Engine:CreateScene("Secondary")
-    Engine:ChangeScene("Secondary")
+    --[[Engine:CreateScene("Secondary")
+    Engine:ChangeScene("Secondary")]]
 end
 
 function love.update(dt)
     Engine:Update(dt)
+    GFX:Update()
 end
 
 function love.draw()
@@ -168,5 +170,5 @@ function love.draw()
     love.graphics.print(BindingsList, 10, 70)
     love.graphics.print("FPS: " .. tostring(love.timer.getFPS()), 10, 90 + (Count * 9))
 
-    Renderer:DrawAll()
+    GFX:Draw()
 end

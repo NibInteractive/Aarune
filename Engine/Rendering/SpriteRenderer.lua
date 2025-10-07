@@ -4,66 +4,50 @@ SpriteRenderer.__index = SpriteRenderer
 function SpriteRenderer:New(Name)
     local MetaSpriteRenderer = setmetatable({}, SpriteRenderer)
     MetaSpriteRenderer.Name = Name or "Unnamed"
-    MetaSpriteRenderer.Images = {}
+    MetaSpriteRenderer.Entities = {}
 
     return MetaSpriteRenderer
 end
 
-function SpriteRenderer:NewSprite(Name, ImagePath, Layer, Width, Height)
-    if not Name and ImagePath then return end
+function SpriteRenderer:RegisterEntity(EntityID, ImagePath, Layer)
+    if not EntityID or not ImagePath then return end
     local Image = love.graphics.newImage(ImagePath)
 
-    self.Images[Name] = {
-        Image = Image or nil,
-        Width = Width or Image:getWidth(),
-        Height = Height or Image:getHeight(),
+    self.Entities[EntityID] = {
+        Image = Image,
         Layer = Layer or 1,
-        x = 0,
-        y = 0,
-        r = 0,
-        sx = 1,
-        sy = 1
+        x = 0, y = 0,
+        r = 0, sx = 1, sy = 1,
+        Width = Image:getWidth(),
+        Height = Image:getHeight()
     }
 
     self:SortLayers()
-    return self.Images[Name]
 end
 
-function SpriteRenderer:SetPosition(Name, x, y)
-    local Sprite = self.Images[Name]
+function SpriteRenderer:UpdateEntityTransform(EntityID, x, y, r, sx, sy)
+    local Sprite = self.Entities[EntityID]
     if not Sprite then return end
 
-    Sprite.x, Sprite.y = x, y
-end
-
-function SpriteRenderer:SetScale(Name, sx, sy)
-    local Sprite = self.Images[Name]
-    if not Sprite then return end
-
-    Sprite.sx, Sprite.sy = sx or 1, sy or 1
-end
-
-function SpriteRenderer:SetRotation(Name, r)
-    local Sprite = self.Images[Name]
-    if not Sprite then return end
-    
-    Sprite.r = r or 0
+    Sprite.x, Sprite.y = x or Sprite.x, y or Sprite.y
+    Sprite.r = r or Sprite.r
+    Sprite.sx, Sprite.sy = sx or Sprite.sx, sy or Sprite.sy
 end
 
 function SpriteRenderer:SortLayers()
     self.Sorted = {}
 
-    for _, Sprite in pairs(self.Images) do
+    for _, Sprite in pairs(self.Entities) do
         table.insert(self.Sorted, Sprite)
     end
     
-    table.sort(self.Sorted, function(a, b)
+    table.sort(self.Entities, function(a, b)
         return a.Layer < b.Layer
     end)
 end
 
 function SpriteRenderer:Draw(Name, x, y, r, sx, sy)
-    local Sprite = self.Images[Name]
+    local Sprite = self.Entities[Name]
     if not Sprite then return end
 
     love.graphics.draw(
@@ -77,14 +61,14 @@ function SpriteRenderer:Draw(Name, x, y, r, sx, sy)
 end 
 
 function SpriteRenderer:DrawAll()
-    for _, sprite in ipairs(self.Sorted or {}) do
+    for _, Sprite in ipairs(self.Sorted or {}) do
         love.graphics.draw(
-            sprite.Image,
-            sprite.x,
-            sprite.y,
-            sprite.r,
-            sprite.sx,
-            sprite.sy
+            Sprite.Image,
+            Sprite.x,
+            Sprite.y,
+            Sprite.r,
+            Sprite.sx,
+            Sprite.sy
         )
     end
 end
