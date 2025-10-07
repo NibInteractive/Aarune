@@ -2,7 +2,7 @@ local Scene = require("Engine.Core.Scene")
 local Camera = require("Engine.Core.Camera")
 local Physics = require("Engine.Physics.Physics")
 
-local Graphics = require("Engine.Rendering.Graphics")
+local Graphics = require("Engine.Wrappers.Graphics")
 
 local Settings = require("ProjectSettings")
 

@@ -2,7 +2,7 @@ local Engine = require("Engine.Core.Core")
 local Bindings = require("Engine.Input.Bindings")
 local Physics = require("Engine.Physics.Physics")
 
-local Graphics = require("Engine.Rendering.Graphics")
+local Graphics = require("Engine.Wrappers.Graphics")
 
 local GamePhysics = Physics:New()
 local PlayerBindings = Bindings:New()
