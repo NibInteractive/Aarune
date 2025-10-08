@@ -50,6 +50,11 @@ function Physics:StaticBodies(Objects)
     end
 end
 
+-- Testing purposes so I don't constantlly change function names between Physics & GamePhysics --
+function Physics:AddStatics(Objects)
+    Physics:StaticBodies(Objects)
+end
+
 function Physics:ApplyTerminalVelocity(Object, TerminalVelocity)
     if not Object or not Object.vy then return end
 
@@ -76,7 +81,6 @@ end
 function Physics:ResolveCollision(A, B)
     if not self:CheckCollision(A, B) then return end
 
-    -- If A is dynamic and B is static, only move A
     if A.PhysicsType == "Dynamic" and B.PhysicsType == "Static" then
         -- Vertical collision
         if A.y + A.height > B.y and A.y < B.y then
@@ -101,7 +105,6 @@ function Physics:Update(Object, dt)
         Object.OnGround = false
     end
 
-    -- Apply gravity
     if Object.vy then
         self:ApplyGravity(Object, dt)
     end

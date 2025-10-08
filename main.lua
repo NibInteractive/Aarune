@@ -1,19 +1,22 @@
 local Engine = require("Engine.Core.Core")
 local Bindings = require("Engine.Input.Bindings")
-local Physics = require("Engine.Physics.Physics")
+local Physics = require("Engine.Wrappers.GamePhysics")
 
 local Graphics = require("Engine.Wrappers.Graphics")
 
+local ECS = require("Engine.Core.ECS")
+
+local GameECS = ECS:New()
 local GamePhysics = Physics:New()
 local PlayerBindings = Bindings:New()
 
 function love.load()
-    GFX = Graphics:New()
+    GFX = Graphics:New(GameECS)
 
     PlayerImage = love.graphics.newImage("Assets/Robin.jpg")
 
-    Chopper = GFX:AddSpriteEntity("Assets/Chopper.jpg", 3, 1600, 50, 0.45, 0.45)
-    Nami = GFX:AddSpriteEntity("Assets/Nami.jfif", 4, 300, 500, 1.25, 1.25)
+    --Chopper = GFX:AddSpriteEntity("Assets/Chopper.jpg", 3, 1600, 50, 0.45, 0.45)
+    --Nami = GFX:AddSpriteEntity("Assets/Nami.jfif", 4, 300, 500, 1.25, 1.25)
 
     PlayerBindings:BindKeys({
         MoveRight = "d",
@@ -43,15 +46,15 @@ function love.load()
                 self.OnGround = false
             end
 
-            GamePhysics:Update(self, dt)
+            GamePhysics:SystemUpdate(dt)
         end,
 
         Draw = function(self)
-            love.graphics.draw(PlayerImage, self.x, self.y, 0, self.width / PlayerImage:getWidth(), self.height / PlayerImage:getHeight())
+            --love.graphics.draw(PlayerImage, self.x, self.y, 0, self.width / PlayerImage:getWidth(), self.height / PlayerImage:getHeight())
 
-            --[[love.graphics.setColor(1, 1, 0)
+            love.graphics.setColor(1, 1, 0)
             love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-            love.graphics.setColor(1, 1, 1)]]
+            love.graphics.setColor(1, 1, 1)
         end,
     }
 
@@ -146,7 +149,8 @@ function love.load()
         end,
     }
 
-    GamePhysics:StaticBodies({ Platform, Box, Box2, Box3, Box4, Circle })
+    GamePhysics:AddDynamic(Player)
+    GamePhysics:AddStatics({ Platform, Box, Box2, Box3, Box4, Circle })
     GamePhysics:ApplyFriction(Player, 0.8)
     
     Engine:SetWindow("Aarune Engine Example", 800, 600, true, true)

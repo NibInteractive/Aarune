@@ -1,13 +1,13 @@
 local Graphics = {}
 Graphics.__index = Graphics
 
-function Graphics:New()
+function Graphics:New(ECS)
     local self = setmetatable({}, Graphics)
 
-    local ECS = require("Engine.Core.ECS")
+    local GameECS = ECS or require("Engine.Core.ECS")
     local SpriteRenderer = require("Engine.Rendering.SpriteRenderer")
 
-    self.ECS = ECS:New()
+    self.ECS = GameECS:New()
     self.Renderer = SpriteRenderer:New()
     
     self.ECS:CreateComponent("Transform")

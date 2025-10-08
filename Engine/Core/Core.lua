@@ -1,8 +1,8 @@
 local Scene = require("Engine.Core.Scene")
 local Camera = require("Engine.Core.Camera")
-local Physics = require("Engine.Physics.Physics")
+local Physics = require("Engine.Wrappers.GamePhysics")
 
-local Graphics = require("Engine.Wrappers.Graphics")
+local PhysicsAPI = Physics:RetrieveAPI()
 
 local Settings = require("ProjectSettings")
 
@@ -135,17 +135,7 @@ function Engine:Update(dt)
         self.CurrentScene:Update(dt)
     end
 
-    for _, Object in ipairs(self.CurrentScene.Objects) do
-        if Object.PhysicsType == "Dynamic" then
-            Physics:Update(Object, dt)
-            
-            for _, Other in ipairs(self.CurrentScene.Objects) do
-                if Other.PhysicsType == "Static" then
-                    Physics:ResolveCollision(Object, Other)
-                end
-            end
-        end
-    end
+    PhysicsAPI:SystemUpdate(dt)
 end
 
 function Engine:Draw()
