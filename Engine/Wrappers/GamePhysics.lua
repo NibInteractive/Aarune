@@ -1,6 +1,9 @@
 local Physics = require("Engine.Physics.Physics") -- your OOP physics module
 local ECS = require("Engine.Core.ECS")            -- ECS module, optional if using ECS
 
+local SpatialHash = require("Engine.Physics.Utilities.SpatialHash")
+local Hash = SpatialHash.New(128)
+
 local PhysicsAPI = {}
 PhysicsAPI.__index = PhysicsAPI
 
@@ -24,8 +27,8 @@ function PhysicsAPI:New(ECSInstance)
         RawObjects = {},
         Collisions = {},
 
-        DefaultFriction = .9,
-        DefaultTerminalVelocity = .9
+        DefaultFriction = .8,
+        DefaultTerminalVelocity = 2500
     }, PhysicsAPI)
 
     return Meta
@@ -109,9 +112,37 @@ function PhysicsAPI:CheckCollisionEvents(A, B, Collided)
 end
 
 function PhysicsAPI:SystemUpdate(dt)
-    self.RawObjects = self.RawObjects or {}
+    dt = dt or (1 / (love.timer.getFPS() or 60))
 
-    -- ECS Entities
+    self.RawObjects = self.RawObjects or {}
+    self.DefaultTerminalVelocity = self.DefaultTerminalVelocity or 1500
+    
+    for _, Object in ipairs(self.RawObjects) do
+        Hash:Insert(Object)
+    end
+
+    local function ResolveWithStatics(DynamicObject)
+        -- Check against RawObjects
+        for _, Other in ipairs(self.RawObjects) do
+            if Other.PhysicsType == "Static" then
+                self.Physics:ResolveCollision(DynamicObject, Other)
+            end
+        end
+
+        -- Check against ECS static entities
+        if self.ECS then
+            local Entities = self.ECS:GetEntitiesWithComponent("Transform")
+
+            for _, id in ipairs(Entities) do
+                local Other = self.ECS:GetComponent(id, "Transform")
+
+                if Other.PhysicsType == "Static" then
+                    self.Physics:ResolveCollision(DynamicObject, Other)
+                end
+            end
+        end
+    end
+
     if self.ECS then
         local Entities = self.ECS:GetEntitiesWithComponent("Transform")
 
@@ -119,50 +150,31 @@ function PhysicsAPI:SystemUpdate(dt)
             local Object = self.ECS:GetComponent(id, "Transform")
 
             if Object.PhysicsType == "Dynamic" then
+                -- First apply gravity & movement
                 self.Physics:Update(Object, dt)
                 self.Physics:ApplyTerminalVelocity(Object, self.DefaultTerminalVelocity)
-                self.Physics:ApplyFriction(Object, self.DefaultFriction)
+                
+                -- Resolve collisions AFTER moving
+                ResolveWithStatics(Object)
 
-                for _, OtherID in ipairs(Entities) do
-                    if id ~= OtherID then
-                        local Other = self.ECS:GetComponent(OtherID, "Transform")
-
-                        if Other.PhysicsType == "Static" then
-                            self.Physics:ResolveCollision(Object, Other)
-                        end
-                    end
-                end
-
-                for _, Other in ipairs(self.RawObjects) do
-                    if Other.PhysicsType == "Static" then
-                        Physics:ResolveCollision(Object, Other)
-                    end
+                -- Apply friction only if on ground
+                if Object.OnGround then
+                    self.Physics:ApplyFriction(Object, self.DefaultFriction)
                 end
             end
         end
     end
 
-    -- Raw objects/OOP Objects
+    -- === Raw OOP Objects ===
     for _, Object in ipairs(self.RawObjects) do
         if Object.PhysicsType == "Dynamic" then
             self.Physics:Update(Object, dt)
             self.Physics:ApplyTerminalVelocity(Object, self.DefaultTerminalVelocity)
-            self.Physics:ApplyFriction(Object, self.DefaultFriction)
 
-            for _, other in ipairs(self.RawObjects) do
-                if other.PhysicsType == "Static" then
-                    self.Physics:ResolveCollision(Object, other)
-                end
-            end
+            ResolveWithStatics(Object)
 
-            if self.ECS then
-                for _, OtherID in ipairs(self.ECS:GetEntitiesWithComponent("Transform")) do
-                    local OtherObj = self.ECS:GetComponent(OtherID, "Transform")
-
-                    if OtherObj.PhysicsType == "Static" then
-                        Physics:ResolveCollision(Object, OtherObj)
-                    end
-                end
+            if Object.OnGround then
+                self.Physics:ApplyFriction(Object, self.DefaultFriction)
             end
         end
     end
