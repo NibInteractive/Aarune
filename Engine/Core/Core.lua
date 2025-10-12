@@ -33,6 +33,7 @@ function Engine:SetWindow(Title, Width, Height, Fullscreen, Resizable)
         fullscreen = Fullscreen or false,
         resizable = Resizable or false,
     })
+    love.window.setVSync(false)
 end
 
 function Engine:SetAdvancedWindow(Title, Width, Height, MinimumWidth, MinimumHeight, Fullscreen, Borderless, Resizable, VSync)
@@ -102,6 +103,12 @@ function Engine:AddObjects(Objects)
     if not self.CurrentScene or not Objects or type(Objects) ~= "table" then return end
 
     self.CurrentScene:AddObjects(Objects)    
+end
+
+function Engine:HasObject(Object)
+    if not self.CurrentScene or not Object then return end
+
+    self.CurrentScene:HasObject(Object)
 end
 
 function Engine:RemoveObject(Object)

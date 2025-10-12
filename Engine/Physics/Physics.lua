@@ -132,9 +132,7 @@ function Physics:ResolveDynamicCollision(A, B, Elasticity)
     A.y = A.y + ny * Half
     B.x = B.x - nx * Half
     B.y = B.y - ny * Half
-
-    -- rudimentary impulse along normal (1D relative velocity)
-    -- project relative velocity on normal:
+    
     local rvx = (A.vx or 0) - (B.vx or 0)
     local rvy = (A.vy or 0) - (B.vy or 0)
     local relVelAlongNormal = rvx * nx + rvy * ny
@@ -149,7 +147,6 @@ function Physics:ResolveDynamicCollision(A, B, Elasticity)
     local j = -(1 + Elasticity) * relVelAlongNormal
     j = j / (InvMassA + InvMassB)
 
-    -- apply impulse
     local ImpulseX = j * nx
     local ImpulseY = j * ny
 

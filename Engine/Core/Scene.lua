@@ -27,6 +27,16 @@ function Scene:AddObjects(Objects)
     end
 end
 
+function Scene:HasObject(Object)
+    for i, v in pairs(self.Objects) do
+        if v == Object then
+            return true
+        end
+    end
+
+    return false
+end
+
 function Scene:SetCamera(Camera)
     self.Camera = Camera
 end

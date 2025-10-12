@@ -10,21 +10,27 @@ local GameECS = ECS:New()
 local GamePhysics = Physics:New()
 local PlayerBindings = Bindings:New()
 
+PlayerBindings:BindKeys({
+        MoveRight = "d",
+        MoveLeft = "a",
+        MoveUp = "w",
+
+        Reset = "r",
+
+        CreateBlock = "g",
+        CreateBall = "b",
+        ClearCreations = "x",
+})
+
 function love.load()
     GFX = Graphics:New(GameECS)
 
     PlayerImage = love.graphics.newImage("Assets/Robin.jpg")
 
-    --Chopper = GFX:AddSpriteEntity("Assets/Chopper.jpg", 3, 1600, 50, 0.45, 0.45)
-    --Nami = GFX:AddSpriteEntity("Assets/Nami.jfif", 4, 300, 500, 1.25, 1.25)
-
-    PlayerBindings:BindKeys({
-        MoveRight = "d",
-        MoveLeft = "a",
-        MoveUp = "w",
-    })
-
-    local Player = {
+    --[[Chopper = GFX:AddSpriteEntity("Assets/Chopper.jpg", 3, 1600, 50, 0.45, 0.45)
+    Nami = GFX:AddSpriteEntity("Assets/Nami.jfif", 4, 300, 500, 1.25, 1.25)
+]]
+    Player = {
         x = 100,
         y = 100,
         width = 45,
@@ -42,7 +48,7 @@ function love.load()
             if PlayerBindings:IsKeyPressed("MoveLeft") then self.x = self.x - self.speed*dt end
 
             if PlayerBindings:IsKeyPressed("MoveUp") and self.OnGround then
-                self.vy = -400 -- Jump Strength
+                self.vy = -425 -- Jump Strength
                 self.OnGround = false
             end
 
@@ -55,6 +61,20 @@ function love.load()
             love.graphics.setColor(1, 1, 0)
             love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
             love.graphics.setColor(1, 1, 1)
+        end,
+    }
+
+    local Object = {
+        x = 500,
+        y = 100,
+        width = 45,
+        height = 45,
+        speed = 200,
+
+        Draw = function(self)
+            love.graphics.setColor(1, 1, 0)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(.75, 0, 1)
         end,
     }
 
@@ -136,31 +156,71 @@ function love.load()
         end,
     }
 
-    local Circle2 = {
-        x = 500,
-        y = 500,
-        width = 25,
-        height = 25,
+    CreatedCircle = {
+        x = 750,
+        y = 700,
+        width = 15,
+        height = 15,
 
         Draw = function(self)
             love.graphics.setColor(1, .5, 0)
             love.graphics.circle("fill", self.x, self.y, self.width, self.height)
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(1, 0.15, 1)
+        end,
+    }
+
+    CreatedBox = {
+        x = 750,
+        y = 250,
+        width = 25,
+        height = 20,
+
+        Draw = function(self)
+            love.graphics.setColor(1, .5, 0)
+            love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+            love.graphics.setColor(.25, 0.65, .15)
         end,
     }
 
     GamePhysics:AddDynamic(Player)
-    GamePhysics:AddStatics({ Platform, Box, Box2, Box3, Box4, Circle })
+    GamePhysics:AddStatics({ Platform, Object, Box, Box2, Box3, Box4, Circle })
     GamePhysics:ApplyFriction(Player, 0.8)
     
     Engine:SetWindow("Aarune Engine Example", 800, 600, true, true)
-    Engine:INIT("Main", {Player, Platform, Box, Box2, Box3, Box4, Circle})
+    Engine:INIT("Main", {Player, Object, Platform, Box, Box2, Box3, Box4, Circle})
 
     --[[Engine:CreateScene("Secondary")
     Engine:ChangeScene("Secondary")]]
 end
 
+local inputdown = false
+
 function love.update(dt)
+    if PlayerBindings:IsKeyPressed("Reset") then
+        Player.x = 100
+        Player.y = 100
+    elseif PlayerBindings:IsKeyPressed("CreateBlock") then
+        if Engine:HasObject(CreatedBox) or inputdown then return end
+        inputdown = true
+
+        GamePhysics:AddStatic(CreatedBox)
+        Engine:AddObject(CreatedBox)
+        
+        inputdown = false
+    elseif PlayerBindings:IsKeyPressed("CreateBall") then
+        if Engine:HasObject(CreatedCircle) or inputdown then return end
+        inputdown = true
+
+        GamePhysics:AddStatic(CreatedCircle)
+        Engine:AddObject(CreatedCircle)
+        
+        inputdown = false
+    elseif PlayerBindings:IsKeyPressed("ClearCreations") then
+        if inputdown then return end
+
+        Engine:RemoveObjects({ CreatedBox, CreatedCircle })
+    end
+
     Engine:Update(dt)
     GFX:Update()
 end

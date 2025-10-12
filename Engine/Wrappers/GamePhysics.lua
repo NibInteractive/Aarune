@@ -85,11 +85,9 @@ function PhysicsAPI:AddStatics(ObjectsOrEntities)
 end
 
 function PhysicsAPI:TriggerCollisionEvent(A, B, Event)
-	-- Object-level callbacks
 	if A[Event] then A[Event](A, B) end
 	if B[Event] then B[Event](B, A) end
 
-	-- ECS-level events (if the object has an ID)
 	if self.ECS then
 		if type(A) == "string" then self.ECS:Dispatch("Physics_" .. Event, A, B) end
 		if type(B) == "string" then self.ECS:Dispatch("Physics_" .. Event, B, A) end
@@ -122,14 +120,12 @@ function PhysicsAPI:SystemUpdate(dt)
     end
 
     local function ResolveWithStatics(DynamicObject)
-        -- Check against RawObjects
         for _, Other in ipairs(self.RawObjects) do
             if Other.PhysicsType == "Static" then
                 self.Physics:ResolveCollision(DynamicObject, Other)
             end
         end
 
-        -- Check against ECS static entities
         if self.ECS then
             local Entities = self.ECS:GetEntitiesWithComponent("Transform")
 
@@ -150,22 +146,18 @@ function PhysicsAPI:SystemUpdate(dt)
             local Object = self.ECS:GetComponent(id, "Transform")
 
             if Object.PhysicsType == "Dynamic" then
-                -- First apply gravity & movement
                 self.Physics:Update(Object, dt)
                 self.Physics:ApplyTerminalVelocity(Object, self.DefaultTerminalVelocity)
                 
-                -- Resolve collisions AFTER moving
                 ResolveWithStatics(Object)
 
-                -- Apply friction only if on ground
                 if Object.OnGround then
                     self.Physics:ApplyFriction(Object, self.DefaultFriction)
                 end
             end
         end
     end
-
-    -- === Raw OOP Objects ===
+    
     for _, Object in ipairs(self.RawObjects) do
         if Object.PhysicsType == "Dynamic" then
             self.Physics:Update(Object, dt)
