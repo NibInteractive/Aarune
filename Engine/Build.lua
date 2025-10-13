@@ -1,5 +1,7 @@
 local Exporter = {}
 
+-- Fuck me
+
 -- Utility function for running shell commands
 local function exec(cmd)
 	local handle = io.popen(cmd)
@@ -30,9 +32,10 @@ local function createShortcut(exePath, shortcutPath, iconPath)
 end
 
 -- Export project to a standalone EXE
-function Exporter.Export(gameName, srcDir)
+function Exporter.Export(gameName, srcDir, engineDir)
 	gameName = gameName or "MyGame"
-	srcDir = srcDir or "Project"
+	srcDir = srcDir or "Projects"
+	engineDir = engineDir or "Engine" -- default engine folder
 
 	local lovePath = "LoveRuntime"
 	local buildPath = "TempBuild"
@@ -42,8 +45,15 @@ function Exporter.Export(gameName, srcDir)
 	os.execute(("mkdir %s"):format(buildPath))
 	os.execute(("mkdir %s"):format(exportPath))
 
+	-- copy project into temp build
+    local tempProject = buildPath .. "\\Project"
+	os.execute(("xcopy /E /I /Y \"%s\" \"%s\" > nul"):format(srcDir, tempProject))
+
 	local loveFile = ("%s\\%s.love"):format(buildPath, gameName)
 	local finalExe = ("%s\\%s.exe"):format(exportPath, gameName)
+
+    print("[Exporter] Copying engine into project folder for export...")
+	os.execute(("xcopy /E /I /Y \"%s\" \"%s\\Engine\" > nul"):format(engineDir, tempProject))
 
 	print("[Exporter] Building .love file...")
 
@@ -63,7 +73,7 @@ function Exporter.Export(gameName, srcDir)
 	os.execute(([[xcopy "%s\*.dll" "%s\" /Y > nul]]):format(lovePath, exportPath))
     
     print("[Exporter] Cleaning up temp files...")
-    os.execute(("rmdir /S /Q %s"):format(buildPath))
+    --os.execute(("rmdir /S /Q %s"):format(buildPath))
 
     local desktopPathHandle = io.popen([[powershell -command "[Environment]::GetFolderPath('Desktop')"]])
 	local desktopPath = desktopPathHandle:read("*a"):gsub("%s+$", "")
@@ -76,6 +86,7 @@ function Exporter.Export(gameName, srcDir)
     finalExe = currentDir .. "\\" .. exportPath .. "\\" .. gameName .. ".exe"
 
     local shortcutPath = ("%s\\%s.lnk"):format(desktopPath, gameName)
+    
 	print("[Exporter] Creating shortcut on desktop...")
 	createShortcut(finalExe, shortcutPath)
 

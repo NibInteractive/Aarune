@@ -159,4 +159,38 @@ function Engine:Draw()
     end
 end
 
+-- You know, it looks ugly on paper, but easy for project files --
+
+Build = require("Engine.Build")
+Camera = require("Engine.Core.Camera")
+Core = require("Engine.Core.Core")
+ECS = require("Engine.Core.ECS")
+Scene = require("Engine.Core.Scene")
+Database = require("Engine.Data.Database")
+FileManagement = require("Engine.Data.Files.FileManagement")
+Bindings = require("Engine.Input.Bindings")
+Physics = require("Engine.Physics.Physics")
+SpatialHash = require("Engine.Physics.Utilities.SpatialHash")
+Vector2 = require("Engine.Physics.Utilities.Vector2")
+ProjectManager = require("Engine.Project.ProjectManager")
+SpriteRenderer = require("Engine.Rendering.SpriteRenderer")
+GamePhysics = require("Engine.Wrappers.GamePhysics")
+Graphics = require("Engine.Wrappers.Graphics")
+
+Engine.Build = Build
+Engine.Camera = Camera
+Engine.Core = Core
+Engine.ECS = ECS
+Engine.Scene = Scene
+Engine.Database = Database
+Engine.FileManagement = FileManagement
+Engine.Bindings = Bindings
+Engine.Physics = Physics
+Engine.SpatialHash = SpatialHash
+Engine.Vector2 = Vector2
+Engine.ProjectManager = ProjectManager
+Engine.SpriteRenderer = SpriteRenderer
+Engine.GamePhysics = GamePhysics
+Engine.Graphics = Graphics
+
 return Engine
