@@ -73,7 +73,7 @@ function Exporter.Export(gameName, srcDir, engineDir)
 	os.execute(([[xcopy "%s\*.dll" "%s\" /Y > nul]]):format(lovePath, exportPath))
     
     print("[Exporter] Cleaning up temp files...")
-    --os.execute(("rmdir /S /Q %s"):format(buildPath))
+    os.execute(("rmdir /S /Q %s"):format(buildPath))
 
     local desktopPathHandle = io.popen([[powershell -command "[Environment]::GetFolderPath('Desktop')"]])
 	local desktopPath = desktopPathHandle:read("*a"):gsub("%s+$", "")

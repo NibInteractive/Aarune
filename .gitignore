@@ -2,4 +2,6 @@
 .VSCodeCounter/
 .TempBuild/
 .Exports/
-main.lua
+.Projects/
+.Assets/
+main.archive.lua

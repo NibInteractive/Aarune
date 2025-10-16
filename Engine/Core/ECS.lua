@@ -19,6 +19,10 @@ local function DeepCopy(Original)
     return Copy
 end
 
+function ECS:RetrieveECS()
+    return self
+end
+
 function ECS:New()
     local MetaECS = setmetatable({
         Systems = {},
